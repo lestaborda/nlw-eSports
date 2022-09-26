@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Navigation, Virtual } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 import * as Dialog from '@radix-ui/react-dialog';
+
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 import './styles/main.css';
 
@@ -9,6 +14,7 @@ import logoImage from './assets/logo-nlw-esports.svg';
 import { GameBanner } from './components/GameBanner';
 import { CreateAdBanner } from './components/CreateAdBanner';
 import { CreateAdModal } from './components/CreateAdModal';
+import { api } from './services/api';
 
 interface Game {
   id: string;
@@ -23,7 +29,7 @@ function App() {
   const [games, setGames] = useState<Game[]>([]);
 
   useEffect(() => {
-    axios('http://localhost:3333/games').then((response) => {
+    api.get('games').then((response) => {
       setGames(response.data);
     });
   }, []);
@@ -39,16 +45,23 @@ function App() {
         está aqui.
       </h1>
 
-      <div className='grid grid-cols-6 gap-6 mt-16'>
-        {games.map((game) => (
-          <GameBanner
-            key={game.id}
-            bannerUrl={game.bannerUrl}
-            title={game.title}
-            adsCount={game._count.ads}
-          />
+      <Swiper
+        slidesPerView={6}
+        navigation={true}
+        modules={[Navigation, Virtual]}
+        className='max-w-[1344px] mt-16'
+        virtual
+      >
+        {games.map((game, index) => (
+          <SwiperSlide key={game.id} virtualIndex={index}>
+            <GameBanner
+              bannerUrl={game.bannerUrl}
+              title={game.title}
+              adsCount={game._count.ads}
+            />
+          </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
 
       <Dialog.Root>
         <CreateAdBanner />
